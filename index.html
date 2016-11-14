@@ -8,17 +8,13 @@
             }
         </style>
     </head>
-    <body>       
+    <body>
+        <h2>Show population</h2>
+        <input type="radio" name="showpop" value="YES" checked onchange="color()"><label for="YES"> YES</label><br>
+        <input type="radio" name="showpop" value="NO" onchange="color()"><label for="NO"> NO</label><br>
+
         <div id="svg" class="fullscreen"></div>
         <script type="text/javascript">
-            var obj = function(party, candidate, pct, votes){
-                return {
-                    party: party, 
-                    candidate: candidate, 
-                    pct: pct, 
-                    votes: votes
-                }
-            }
             var data = {
                 "WA_6": {
                     "pop": 654902,
@@ -28,25 +24,44 @@
             }
         </script>
         <script type="text/javascript">
-            var s = Snap("#svg");
+            var global_svg = Snap("#svg");//lazy
+            var global_showpop = true;// lazy!
             var buildGradientString = function(info){
-                var r =  Math.round((info.r / info.pop)*100, 1);
-                var d =  Math.round(100 - (info.d / info.pop)*100, 1);
+                var d, r;
+                var showpop = document.querySelectorAll('input:checked');
+                if(showpop[0].value == "YES"){
+                    console.log("showing pop")
+                    r =  Math.round((info.r / info.pop)*100, 1);
+                    d =  Math.round(100 - (info.d / info.pop)*100, 1);
+                } else {
+                    console.log("not showing pop")
+                    var sum_of_votes = info.r + info.d;
+                    r =  Math.round((info.r / sum_of_votes)*100, 1);
+                    d =  Math.round(100 - (info.d / sum_of_votes)*100, 1);
+                }
+
                 var builtstring = "l(0, 0, 1, 0)#F00:"+r+"-#ccc:"+r+"-#ccc:"+d+"-#00F:"+d+"-#00F"
                 return builtstring
             };
 
             Snap.load("US_Congressional_districts.svg", function (f) {
-                var keys = Object.keys(data);
-                keys.forEach(function _addColors(key){
-                    var district = f.select("#"+key);
-                    var gradient = district.paper.gradient(buildGradientString(data[key]));
-                    district.attr({
-                        fill: gradient
-                    });
-                });
-                s.append(f);
+                global_svg.append(f);
+                color(true);
             })
+            var _addColors = function(key){
+                var district = global_svg.select("#"+key);
+                var gradient = district.paper.gradient(buildGradientString(data[key]));
+                district.attr({
+                    fill: gradient
+                });
+            }
+            function color(showpop){
+                if(showpop){
+                    global_showpop = showpop;
+                }
+                var keys = Object.keys(data);
+                keys.forEach(_addColors);
+            }
         </script>
     </body>
 </html>
