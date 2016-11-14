@@ -1,0 +1,52 @@
+<html>
+    <head>
+        <script type="text/javascript" src="Snap.svg-0.4.1/dist/snap.svg-min.js"></script>
+        <style>
+            .fullscreen {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
+    <body>       
+        <div id="svg" class="fullscreen"></div>
+        <script type="text/javascript">
+            var obj = function(party, candidate, pct, votes){
+                return {
+                    party: party, 
+                    candidate: candidate, 
+                    pct: pct, 
+                    votes: votes
+                }
+            }
+            var data = {
+                "WA_6": {
+                    "pop": 654902,
+                    "d": 130326,
+                    "r": 79141
+                }
+            }
+        </script>
+        <script type="text/javascript">
+            var s = Snap("#svg");
+            var buildGradientString = function(info){
+                var r =  Math.round((info.r / info.pop)*100, 1);
+                var d =  Math.round(100 - (info.d / info.pop)*100, 1);
+                var builtstring = "l(0, 0, 1, 0)#F00:"+r+"-#ccc:"+r+"-#ccc:"+d+"-#00F:"+d+"-#00F"
+                return builtstring
+            };
+
+            Snap.load("US_Congressional_districts.svg", function (f) {
+                var keys = Object.keys(data);
+                keys.forEach(function _addColors(key){
+                    var district = f.select("#"+key);
+                    var gradient = district.paper.gradient(buildGradientString(data[key]));
+                    district.attr({
+                        fill: gradient
+                    });
+                });
+                s.append(f);
+            })
+        </script>
+    </body>
+</html>
