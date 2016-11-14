@@ -10,17 +10,23 @@
     </head>
     <body>
         <h2>Show population</h2>
-        <input type="radio" name="showpop" value="YES" checked onchange="color()"><label for="YES"> YES</label><br>
-        <input type="radio" name="showpop" value="NO" onchange="color()"><label for="NO"> NO</label><br>
+        <input type="radio" name="showpop" value="YES"  onchange="color()"><label for="YES"> YES (elligible voter population data currently unavailable)</label><br>
+        <input type="radio" name="showpop" value="NO" checked onchange="color()"><label for="NO"> NO</label><br>
 
         <div id="svg" class="fullscreen"></div>
+        * washington state voter data: http://results.vote.wa.gov/results/current/Federal-All.html
         <script type="text/javascript">
             var data = {
-                "WA_6": {
-                    "pop": 654902,
-                    "d": 130326,
-                    "r": 79141
-                }
+                "WA-01": { "pop": 654902, "d": 171636, "r": 136704 },
+                "WA-02": { "pop": 654902, "d": 185151, "r": 102301 },
+                "WA-03": { "pop": 654902, "d": 167909, "r": 108073 },
+                "WA-04": { "pop": 654902, "d": 99984 , "r": 75174  },
+                "WA-05": { "pop": 654902, "d": 162039, "r": 110324 },
+                "WA-06": { "pop": 654902, "d": 175291, "r": 107465 },
+                "WA-07": { "pop": 654902, "d": 186542, "r": 146034 },
+                "WA-08": { "pop": 654902, "d": 160571, "r": 108707 },
+                "WA-09": { "pop": 654902, "d": 180702, "r": 66373  },
+                "WA-10": { "pop": 654902, "d": 149340, "r": 105060 }
             }
         </script>
         <script type="text/javascript">
@@ -44,9 +50,9 @@
                 return builtstring
             };
 
-            Snap.load("US_Congressional_districts.svg", function (f) {
+            Snap.load("113th_U.S._Congress_House_districts_blank.svg", function (f) {
                 global_svg.append(f);
-                color(true);
+                color(false);
             })
             var _addColors = function(key){
                 var district = global_svg.select("#"+key);
