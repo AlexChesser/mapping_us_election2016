@@ -14,59 +14,52 @@
         <input type="radio" name="showpop" value="NO" checked onchange="color()"><label for="NO"> NO</label><br>
 
         <div id="svg" class="fullscreen"></div>
-        * washington state voter data: http://results.vote.wa.gov/results/current/Federal-All.html
+        
+        <script type="text/javascript" src="nytdata.js"></script>
         <script type="text/javascript">
-            var data = {
-                "WA-01": { "pop": 654902, "d": 171636, "r": 136704 },
-                "WA-02": { "pop": 654902, "d": 185151, "r": 102301 },
-                "WA-03": { "pop": 654902, "d": 167909, "r": 108073 },
-                "WA-04": { "pop": 654902, "d": 99984 , "r": 75174  },
-                "WA-05": { "pop": 654902, "d": 162039, "r": 110324 },
-                "WA-06": { "pop": 654902, "d": 175291, "r": 107465 },
-                "WA-07": { "pop": 654902, "d": 186542, "r": 146034 },
-                "WA-08": { "pop": 654902, "d": 160571, "r": 108707 },
-                "WA-09": { "pop": 654902, "d": 180702, "r": 66373  },
-                "WA-10": { "pop": 654902, "d": 149340, "r": 105060 }
-            }
-        </script>
-        <script type="text/javascript">
-            var global_svg = Snap("#svg");//lazy
-            var global_showpop = true;// lazy!
-            var buildGradientString = function(info){
+            var global_svg = Snap("#svg");
+            var global_showpop = true; 
+
+            Snap.load("Usa_counties_large.svg", function (f) {
+                global_svg.append(f);
+                color(false);
+            })
+
+            var buildCountyGradientString = function(county){
                 var d, r;
-                var showpop = document.querySelectorAll('input:checked');
-                if(showpop[0].value == "YES"){
-                    console.log("showing pop")
-                    r =  Math.round((info.r / info.pop)*100, 1);
-                    d =  Math.round(100 - (info.d / info.pop)*100, 1);
-                } else {
-                    console.log("not showing pop")
-                    var sum_of_votes = info.r + info.d;
-                    r =  Math.round((info.r / sum_of_votes)*100, 1);
-                    d =  Math.round(100 - (info.d / sum_of_votes)*100, 1);
-                }
+                var res = county.results;
+
+                r =  Math.round((res.trumpd / county.votes)*100, 1);
+                d =  Math.round(100 - (res.clintonh / county.votes)*100, 1);
 
                 var builtstring = "l(0, 0, 1, 0)#F00:"+r+"-#ccc:"+r+"-#ccc:"+d+"-#00F:"+d+"-#00F"
                 return builtstring
             };
 
-            Snap.load("113th_U.S._Congress_House_districts_blank.svg", function (f) {
-                global_svg.append(f);
-                color(false);
-            })
-            var _addColors = function(key){
-                var district = global_svg.select("#"+key);
-                var gradient = district.paper.gradient(buildGradientString(data[key]));
-                district.attr({
-                    fill: gradient
+            var _addCountyColors = function(state, county){
+                var path = global_svg.select("[id='"+county.name.replace("'", "\\'") + ", " +state.state_id + "']");
+                if(path === null){
+                    console.log("NOT FOUND:\t", "#"+county.name + ", " +state.state_id, county, state)
+                    console.log(document.getElementById(county.name + ", " +state.state_id))
+                    return;
+                }
+                var gradient = path.paper.gradient(buildCountyGradientString(county));
+                path.attr({
+                     fill: gradient
                 });
             }
-            function color(showpop){
-                if(showpop){
-                    global_showpop = showpop;
+
+            var _addStateColors = function(state){
+                for(var i = 0; i < state.counties.length; i++){
+                    _addCountyColors(state, state.counties[i]);
                 }
-                var keys = Object.keys(data);
-                keys.forEach(_addColors);
+            }
+
+            function color(showpop){
+                for(var i = 0; i < nytdata.length; i++){
+                    var race = nytdata[i];
+                    _addStateColors(race);
+                }
             }
         </script>
     </body>
