@@ -1,0 +1,63 @@
+<html>
+    <head>
+        <script type="text/javascript" src="Snap.svg-0.4.1/dist/snap.svg-min.js"></script>
+        <style>
+            .fullscreen {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>Show population</h2>
+        <input type="radio" name="showpop" value="YES"  onchange="color()"><label for="YES"> YES (elligible voter population data currently unavailable)</label><br>
+        <input type="radio" name="showpop" value="NO" checked onchange="color()"><label for="NO"> NO</label><br>
+
+        <div id="svg" class="fullscreen"></div>
+        
+        <script type="text/javascript" src="nytdata.js"></script>
+        <script type="text/javascript">
+            var global_svg = Snap("#svg");
+            var global_showpop = true; 
+
+            Snap.load("blank-us-map.svg", function (f) {
+                global_svg.append(f);
+                color(false);
+            })
+
+            var getCandidate = function(c, who){
+                return c.candidates.filter(function(arr){ return arr.candidate_key == who })[0]
+            }
+
+            var buildStateGradientString = function(state){
+                var hil = getCandidate(state, "clintonh"),
+                    don = getCandidate(state, "trumpd");
+                
+                r =  Math.round((don.votes / state.votes)*100, 1);
+                d =  Math.round(100 - (hil.votes / state.votes)*100, 1);
+
+                var builtstring = "l(0, 0, 1, 0)#F00:"+r+"-#ccc:"+r+"-#ccc:"+d+"-#00F:"+d+"-#00F"
+                return builtstring
+            };
+
+            var _addStateColors = function(state){
+                var path = global_svg.select("[id='"+state.state_id + "']");
+                if(path === null){
+                    console.log("NOT FOUND:\t", "#"+state.state_id, state)
+                    return;
+                }
+                var gradient = path.paper.gradient(buildStateGradientString(state));
+                path.attr({
+                     fill: gradient
+                });
+            }
+
+            function color(showpop){
+                for(var i = 0; i < nytdata.length; i++){
+                    var state = nytdata[i];
+                    _addStateColors(state);
+                }
+            }
+        </script>
+    </body>
+</html>
